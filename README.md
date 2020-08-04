@@ -5,3 +5,4 @@ In PowerShell make sure you have extension azure-iot and have removed azure-cli-
   az extension remove --name azure-cli-iot-ext  
 To show events (if they are not being pushed some where else (like with message routing)  
   az iot hub monitor-events -n {iothub_name}  
+This project is setup for ESP 8266 with WIFI access to Azure IoT Hub with NTP and scheduler
