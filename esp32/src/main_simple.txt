@@ -1,0 +1,49 @@
+#include <Arduino.h>
+#include <WiFi.h>
+#include "Esp32MQTTClient.h"
+const char* ssid     = "EnglishHome";
+const char* password = "970-402-1912";
+static const char* connectionString = "HostName=NeaeraIoTHub.azure-devices.net;DeviceId=DadESP8266;SharedAccessKey=uDWu2WFZwM56de5QHkPBcWlop5ys41R/IZMl/gPhkQU=";
+static bool hasIoTHub = false;
+void setup() {
+  Serial.begin(115200);
+  Serial.println("Starting connecting WiFi.");
+  delay(10);
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("WiFi connected");
+  Serial.println("IP address: ");
+  Serial.println(WiFi.localIP());
+
+  if (!Esp32MQTTClient_Init((const uint8_t*)connectionString))
+  {
+    hasIoTHub = false;
+    Serial.println("Initializing IoT hub failed.");
+    return;
+  }
+  hasIoTHub = true;
+Serial.println("hello");
+}
+
+void loop() {
+  Serial.println("start sending events.");
+  if (hasIoTHub)
+  {
+    char buff[128];
+
+     snprintf(buff, 128, "{\"topic\":\"iot\"}");
+    
+    if (Esp32MQTTClient_SendEvent(buff))
+    {
+      Serial.println("Sending data succeed");
+    }
+    else
+    {
+      Serial.println("Failure...");
+    }
+    delay(5000);
+  }
+}
