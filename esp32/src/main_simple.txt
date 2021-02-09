@@ -1,9 +1,10 @@
 #include <Arduino.h>
 #include <WiFi.h>
 #include "Esp32MQTTClient.h"
-const char* ssid     = "EnglishHome";
-const char* password = "970-402-1912";
-static const char* connectionString = "HostName=NeaeraIoTHub.azure-devices.net;DeviceId=DadESP8266;SharedAccessKey=uDWu2WFZwM56de5QHkPBcWlop5ys41R/IZMl/gPhkQU=";
+#include "configs.h"
+const char* ssid     = CONFIG_WIFI_SSID;
+const char* password = CONFIG_WIFI_PASSWORD;
+static const char* connectionString = DEVICE_CONNECTION_STRING;
 static bool hasIoTHub = false;
 void setup() {
   Serial.begin(115200);
