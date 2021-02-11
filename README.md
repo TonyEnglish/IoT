@@ -10,3 +10,4 @@ HSM: https://www.infineon.com/cms/en/product/security-smart-card-solutions/optig
 HSM purchase: https://www.adafruit.com/product/4351  
 GitHub for HSM lib https://github.com/Infineon/optiga-trust-m  
 Pinout for NodeMCU ESP-32s https://cyberblogspot.com/nodemcu-esp-32s-pin-configuration/
+Datasheet for NodeMCU ESP32 https://www.espressif.com/sites/default/files/documentation/esp32_datasheet_en.pdf
