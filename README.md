@@ -9,6 +9,6 @@ This project is setup for ESP 8266 with WIFI access to Azure IoT Hub with NTP an
 HSM: https://www.infineon.com/cms/en/product/security-smart-card-solutions/optiga-embedded-security-solutions/optiga-trust/optiga-trust-m-sls32aia/  
 HSM purchase: https://www.adafruit.com/product/4351  
 GitHub for HSM lib https://github.com/Infineon/optiga-trust-m  
-Pinout for NodeMCU ESP-32s https://cyberblogspot.com/nodemcu-esp-32s-pin-configuration/
-Datasheet for NodeMCU ESP32 https://www.espressif.com/sites/default/files/documentation/esp32_datasheet_en.pdf
+Pinout for NodeMCU ESP-32s https://cyberblogspot.com/nodemcu-esp-32s-pin-configuration/  
+Datasheet for NodeMCU ESP32 https://www.espressif.com/sites/default/files/documentation/esp32_datasheet_en.pdf  
 ![alt text](https://github.com/TonyEnglish/IoT/blob/main/images/NodeMCU%2032s.png)
