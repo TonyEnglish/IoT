@@ -106,7 +106,8 @@ void setup()
   Serial.begin(115200);
   Serial.println("ESP32 Device");
   Serial.println("Initializing...");
-
+  //pin 2 is gpio 2, called pin 4 on drawing
+  pinMode(2,INPUT_PULLDOWN);
   // Initialize the WiFi module
   Serial.println(" > WiFi");
   hasWifi = false;
@@ -138,6 +139,7 @@ void loop()
     {
       // Send temperature data
       Serial.println(time(nullptr));
+      Serial.println(digitalRead(2));
       char messagePayload[MESSAGE_MAX_LEN];
       float temperature = (float)random(0,50);
       float humidity = (float)random(0, 1000)/10;
