@@ -19,7 +19,8 @@ const char* password = CONFIG_WIFI_PASSWORD;
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessSignature=<device_sas_token>"    */
 static const char* connectionString = DEVICE_CONNECTION_STRING;
 
-const char *messageData = "{\"deviceId\":\"%s\", \"messageId\":%d, \"Temperature\":%f, \"Humidity\":%f, \"Time\":%ld}";
+//const char *messageData = "{\"deviceId\":\"%s\", \"messageId\":%d, \"Temperature\":%f, \"Humidity\":%f, \"Time\":%ld}";
+const char *messageData = "{\"deviceId\":\"%s\", \"messageId\":%d, \"Time\":%ld}";
 
 int messageCount = 1;
 static bool hasWifi = false;
@@ -72,18 +73,21 @@ static void DeviceTwinCallback(DEVICE_TWIN_UPDATE_STATE updateState, const unsig
 
 static int  DeviceMethodCallback(const char *methodName, const unsigned char *payload, int size, unsigned char **response, int *response_size)
 {
+  //to use to to Direct Method and put in Method Name stop or start and then click invoke method within Azure for the device
   LogInfo("Try to invoke method %s", methodName);
   const char *responseMessage = "\"Successfully invoke device method\"";
   int result = 200;
 
   if (strcmp(methodName, "start") == 0)
   {
-    LogInfo("Start sending temperature and humidity data");
+    //LogInfo("Start sending temperature and humidity data");
+    LogInfo("Start new run");
     messageSending = true;
   }
   else if (strcmp(methodName, "stop") == 0)
   {
-    LogInfo("Stop sending temperature and humidity data");
+    //LogInfo("Stop sending temperature and humidity data");
+    LogInfo("Stop run");
     messageSending = false;
   }
   else
@@ -141,12 +145,14 @@ void loop()
       Serial.println(time(nullptr));
       Serial.println(digitalRead(2));
       char messagePayload[MESSAGE_MAX_LEN];
-      float temperature = (float)random(0,50);
-      float humidity = (float)random(0, 1000)/10;
-      snprintf(messagePayload,MESSAGE_MAX_LEN, messageData, DEVICE_ID, messageCount++, temperature,humidity, time(nullptr));
+      //float temperature = (float)random(0,50);
+      //float humidity = (float)random(0, 1000)/10;
+      //snprintf(messagePayload,MESSAGE_MAX_LEN, messageData, DEVICE_ID, messageCount++, temperature,humidity, time(nullptr));
+      snprintf(messagePayload,MESSAGE_MAX_LEN, messageData, DEVICE_ID, messageCount++, time(nullptr));
       Serial.println(messagePayload);
       EVENT_INSTANCE* message = Esp32MQTTClient_Event_Generate(messagePayload, MESSAGE);
-      Esp32MQTTClient_Event_AddProp(message, "temperatureAlert", "true");
+      //Esp32MQTTClient_Event_AddProp(message, "temperatureAlert", "true");
+      Esp32MQTTClient_Event_AddProp(message, "robotStart", "true");
       Esp32MQTTClient_SendEventInstance(message);
       
       send_interval_ms = millis();
