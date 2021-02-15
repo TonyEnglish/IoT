@@ -6,7 +6,7 @@
 #include "time.h"
 #include "configs.h"
 
-#define INTERVAL 10000
+#define INTERVAL 10000 //wait time after start before stop can be executed
 #define DEVICE_ID "Esp32Device"
 #define MESSAGE_MAX_LEN 256
 
@@ -24,7 +24,7 @@ const char *messageData = "{\"deviceId\":\"%s\", \"messageId\":%d, \"Time\":%ld}
 
 int messageCount = 1;
 static bool hasWifi = false;
-static bool messageSending = true;
+static bool messageSending = false;  //change to true to initially start sendind messages
 static uint64_t send_interval_ms;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -139,7 +139,8 @@ void loop()
   if (hasWifi)
   {
     if (messageSending && 
-        (int)(millis() - send_interval_ms) >= INTERVAL)
+        (int)(millis() - send_interval_ms) >= INTERVAL &&
+        digitalRead(2))
     {
       // Send temperature data
       Serial.println(time(nullptr));
@@ -152,9 +153,9 @@ void loop()
       Serial.println(messagePayload);
       EVENT_INSTANCE* message = Esp32MQTTClient_Event_Generate(messagePayload, MESSAGE);
       //Esp32MQTTClient_Event_AddProp(message, "temperatureAlert", "true");
-      Esp32MQTTClient_Event_AddProp(message, "robotStart", "true");
+      Esp32MQTTClient_Event_AddProp(message, "robot_Start_Stop", "true");
       Esp32MQTTClient_SendEventInstance(message);
-      
+  
       send_interval_ms = millis();
     }
     else
