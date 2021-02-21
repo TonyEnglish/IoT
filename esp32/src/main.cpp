@@ -6,7 +6,7 @@
 #include "time.h"
 #include "configs.h"
 
-#define INTERVAL 10000 //wait time after start before stop can be executed
+#define INTERVAL 5000 //wait time after start before stop can be executed
 #define DEVICE_ID "Esp32Device"
 #define MESSAGE_MAX_LEN 256
 
@@ -20,12 +20,15 @@ const char* password = CONFIG_WIFI_PASSWORD;
 static const char* connectionString = DEVICE_CONNECTION_STRING;
 
 //const char *messageData = "{\"deviceId\":\"%s\", \"messageId\":%d, \"Temperature\":%f, \"Humidity\":%f, \"Time\":%ld}";
-const char *messageData = "{\"deviceId\":\"%s\", \"messageId\":%d, \"Time\":%ld}";
+const char *messageData = "{\"deviceId\":\"%s\", \"messageId\":%d, \"Time\":%ld, \"Race time ms\":%ld}";
 
 int messageCount = 1;
 static bool hasWifi = false;
 static bool messageSending = false;  //change to true to initially start sendind messages
 static uint64_t send_interval_ms;
+static bool race_started = false;
+static uint64_t race_time_ms;
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Utilities
@@ -89,6 +92,7 @@ static int  DeviceMethodCallback(const char *methodName, const unsigned char *pa
     //LogInfo("Stop sending temperature and humidity data");
     LogInfo("Stop run");
     messageSending = false;
+    race_started = false;
   }
   else
   {
@@ -142,21 +146,31 @@ void loop()
         (int)(millis() - send_interval_ms) >= INTERVAL &&
         digitalRead(2))
     {
-      // Send temperature data
-      Serial.println(time(nullptr));
-      Serial.println(digitalRead(2));
-      char messagePayload[MESSAGE_MAX_LEN];
-      //float temperature = (float)random(0,50);
-      //float humidity = (float)random(0, 1000)/10;
-      //snprintf(messagePayload,MESSAGE_MAX_LEN, messageData, DEVICE_ID, messageCount++, temperature,humidity, time(nullptr));
-      snprintf(messagePayload,MESSAGE_MAX_LEN, messageData, DEVICE_ID, messageCount++, time(nullptr));
-      Serial.println(messagePayload);
-      EVENT_INSTANCE* message = Esp32MQTTClient_Event_Generate(messagePayload, MESSAGE);
-      //Esp32MQTTClient_Event_AddProp(message, "temperatureAlert", "true");
-      Esp32MQTTClient_Event_AddProp(message, "robot_Start_Stop", "true");
-      Esp32MQTTClient_SendEventInstance(message);
-  
-      send_interval_ms = millis();
+      if (!race_started)
+      {
+        Serial.println("Race Started!");
+        race_time_ms = millis();
+        race_started = true;
+      }
+      else
+      {
+        Serial.println("Race Stopped!");
+        race_time_ms = millis() - race_time_ms;
+        //Serial.println(time(nullptr));
+        //Serial.println(digitalRead(2));
+        char messagePayload[MESSAGE_MAX_LEN];
+        //float temperature = (float)random(0,50);
+        //float humidity = (float)random(0, 1000)/10;
+        //snprintf(messagePayload,MESSAGE_MAX_LEN, messageData, DEVICE_ID, messageCount++, temperature,humidity, time(nullptr));
+        snprintf(messagePayload,MESSAGE_MAX_LEN, messageData, DEVICE_ID, messageCount++, time(nullptr), race_time_ms);
+        //Serial.println(messagePayload);
+        EVENT_INSTANCE* message = Esp32MQTTClient_Event_Generate(messagePayload, MESSAGE);
+        //Esp32MQTTClient_Event_AddProp(message, "temperatureAlert", "true");
+        Esp32MQTTClient_Event_AddProp(message, "robot_Start_Stop", "true");
+        Esp32MQTTClient_SendEventInstance(message);
+        race_started = false;        
+      }
+      send_interval_ms = millis(); 
     }
     else
     {
