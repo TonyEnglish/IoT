@@ -156,6 +156,7 @@ void loop()
       {
         Serial.println("Race Stopped!");
         race_time_ms = millis() - race_time_ms;
+        Serial.println((byte)(race_time_ms % 10));
         //Serial.println(time(nullptr));
         //Serial.println(digitalRead(2));
         char messagePayload[MESSAGE_MAX_LEN];
