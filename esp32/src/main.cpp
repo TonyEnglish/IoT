@@ -1,5 +1,3 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. 
 #include <WiFi.h>
 #include "AzureIotHub.h"
 #include "Esp32MQTTClient.h"
@@ -11,24 +9,23 @@
 #define MESSAGE_MAX_LEN 256
 
 // Please input the SSID and password of WiFi
-const char* ssid     = CONFIG_WIFI_SSID;
-const char* password = CONFIG_WIFI_PASSWORD;
+const char *ssid = CONFIG_WIFI_SSID;
+const char *password = CONFIG_WIFI_PASSWORD;
 
 /*String containing Hostname, Device Id & Device Key in the format:                         */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"                */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessSignature=<device_sas_token>"    */
-static const char* connectionString = DEVICE_CONNECTION_STRING;
+static const char *connectionString = DEVICE_CONNECTION_STRING;
 
 //const char *messageData = "{\"deviceId\":\"%s\", \"messageId\":%d, \"Temperature\":%f, \"Humidity\":%f, \"Time\":%ld}";
 const char *messageData = "{\"deviceId\":\"%s\", \"messageId\":%d, \"Time\":%ld, \"Race time ms\":%ld}";
 
 int messageCount = 1;
 static bool hasWifi = false;
-static bool messageSending = false;  //change to true to initially start sendind messages
+static bool messageSending = false; //change to true to initially start sendind messages
 static uint64_t send_interval_ms;
 static bool race_started = false;
 static uint64_t race_time_ms;
-
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Utilities
@@ -36,7 +33,8 @@ static void InitWifi()
 {
   Serial.println("Connecting...");
   WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) {
+  while (WiFi.status() != WL_CONNECTED)
+  {
     delay(500);
     Serial.print(".");
   }
@@ -54,7 +52,7 @@ static void SendConfirmationCallback(IOTHUB_CLIENT_CONFIRMATION_RESULT result)
   }
 }
 
-static void MessageCallback(const char* payLoad, int size)
+static void MessageCallback(const char *payLoad, int size)
 {
   Serial.println("Message callback:");
   Serial.println(payLoad);
@@ -74,7 +72,7 @@ static void DeviceTwinCallback(DEVICE_TWIN_UPDATE_STATE updateState, const unsig
   free(temp);
 }
 
-static int  DeviceMethodCallback(const char *methodName, const unsigned char *payload, int size, unsigned char **response, int *response_size)
+static int DeviceMethodCallback(const char *methodName, const unsigned char *payload, int size, unsigned char **response, int *response_size)
 {
   //to use to to Direct Method and put in Method Name stop or start and then click invoke method within Azure for the device
   LogInfo("Try to invoke method %s", methodName);
@@ -115,7 +113,7 @@ void setup()
   Serial.println("ESP32 Device");
   Serial.println("Initializing...");
   //pin 2 is gpio 2, called pin 4 on drawing
-  pinMode(2,INPUT_PULLDOWN);
+  pinMode(2, INPUT_PULLDOWN);
   // Initialize the WiFi module
   Serial.println(" > WiFi");
   hasWifi = false;
@@ -128,7 +126,7 @@ void setup()
 
   Serial.println(" > IoT Hub");
   Esp32MQTTClient_SetOption(OPTION_MINI_SOLUTION_NAME, "GetStarted");
-  Esp32MQTTClient_Init((const uint8_t*)connectionString, true);
+  Esp32MQTTClient_Init((const uint8_t *)connectionString, true);
 
   Esp32MQTTClient_SetSendConfirmationCallback(SendConfirmationCallback);
   Esp32MQTTClient_SetMessageCallback(MessageCallback);
@@ -142,7 +140,7 @@ void loop()
 {
   if (hasWifi)
   {
-    if (messageSending && 
+    if (messageSending &&
         (int)(millis() - send_interval_ms) >= INTERVAL &&
         digitalRead(2))
     {
@@ -156,22 +154,22 @@ void loop()
       {
         Serial.println("Race Stopped!");
         race_time_ms = millis() - race_time_ms;
-        Serial.println((byte)(race_time_ms % 10));
+        //Serial.println((byte)(race_time_ms % 10));
         //Serial.println(time(nullptr));
         //Serial.println(digitalRead(2));
         char messagePayload[MESSAGE_MAX_LEN];
         //float temperature = (float)random(0,50);
         //float humidity = (float)random(0, 1000)/10;
         //snprintf(messagePayload,MESSAGE_MAX_LEN, messageData, DEVICE_ID, messageCount++, temperature,humidity, time(nullptr));
-        snprintf(messagePayload,MESSAGE_MAX_LEN, messageData, DEVICE_ID, messageCount++, time(nullptr), race_time_ms);
+        snprintf(messagePayload, MESSAGE_MAX_LEN, messageData, DEVICE_ID, messageCount++, time(nullptr), race_time_ms);
         //Serial.println(messagePayload);
-        EVENT_INSTANCE* message = Esp32MQTTClient_Event_Generate(messagePayload, MESSAGE);
+        EVENT_INSTANCE *message = Esp32MQTTClient_Event_Generate(messagePayload, MESSAGE);
         //Esp32MQTTClient_Event_AddProp(message, "temperatureAlert", "true");
         Esp32MQTTClient_Event_AddProp(message, "robot_Start_Stop", "true");
         Esp32MQTTClient_SendEventInstance(message);
-        race_started = false;        
+        race_started = false;
       }
-      send_interval_ms = millis(); 
+      send_interval_ms = millis();
     }
     else
     {
